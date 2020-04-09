@@ -17,7 +17,7 @@ $ pip install -r requirements.txt
 
 To run a simple example just enter ```python example.py``` on terminal. Output image will be saved at the root.
 
-![alt text]('./score_cam.png')
+![alt text](./score_cam.png)
 
 ## ATTENTION
 
