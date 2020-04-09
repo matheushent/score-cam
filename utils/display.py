@@ -2,8 +2,8 @@
 import math
 import warnings
 
-import cv2
 import numpy as np
+import cv2
 
 import tensorflow as tf
 
@@ -55,6 +55,22 @@ def grid_display(array, num_rows=None, num_columns=None):
     )
 
     return grid
+
+def image_to_uint_255(image):
+    """
+    Convert float images to int 0-255 images.
+    Args:
+        image (numpy.ndarray): Input image. Can be either [0, 255], [0, 1], [-1, 1]
+    Returns:
+        numpy.ndarray:
+    """
+    if image.dtype == np.uint8:
+        return image
+
+    if image.min() < 0:
+        image = (image + 1.0) / 2.0
+
+    return (image * 255).astype("uint8")
 
 def heatmap_display(
     heatmap, original_image, colormap=cv2.COLORMAP_VIRIDIS, image_weight=0.7
