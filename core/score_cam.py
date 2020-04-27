@@ -25,7 +25,7 @@ class ScoreCAM:
         model,
         class_index,
         input_shape=None,
-        colormap=cv2.COLORMAP_VIRIDIS,
+        colormap=cv2.COLORMAP_JET,
         image_weight=0.7,
         _grid=True
     ):
@@ -68,7 +68,7 @@ class ScoreCAM:
         heatmaps = np.array(
             [
                 # not showing the actual image if image_weight=0
-                heatmap_display(cam[0].numpy(), images[0], colormap, image_weight)
+                heatmap_display(cam.numpy()[0], images[0], colormap, image_weight)
             ]
         )
 
