@@ -73,7 +73,7 @@ def image_to_uint_255(image):
     return (image * 255).astype("uint8")
 
 def heatmap_display(
-    heatmap, original_image, colormap=cv2.COLORMAP_VIRIDIS, image_weight=0.7
+    heatmap, original_image, colormap=cv2.COLORMAP_JET, image_weight=0.7
 ):
     """
     Apply a heatmap (as an np.ndarray) on top of an original image.
