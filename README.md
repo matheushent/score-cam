@@ -19,6 +19,11 @@ To run a simple example just enter ```python example.py``` on terminal. Output i
 
 ![alt text](./score_cam.png)
 
+## Upcoming
+
+* Visualize more than one image per run
+* Implement on [tf-explain](https://github.com/sicara/tf-explain)
+
 ## ATTENTION
 
 By now, something is going wrong. Feel free to open an issue and/or submit a pull request.
