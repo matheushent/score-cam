@@ -25,9 +25,15 @@ def normalize_activations(tensor):
     Returns
         tf.Tensor: 4D-Tensor with shape (batch_size, H, W, K) μ = 0 and σ = 1
     """
-    
-    normalized_tensor = tf.cast(
-        tf.image.per_image_standardization(tensor), tf.float32
-    )
 
+    normalized_tensor = tf.linalg.normalize(
+        tensor, ord='euclidean', axis=None
+    )[0]
+    
+    # ensure dtype == tf.float32
+    if normalized_tensor.dtype != tf.float32:
+        normalized_tensor = tf.cast(
+            normalized_tensor, tf.float32
+        )
+    
     return normalized_tensor
