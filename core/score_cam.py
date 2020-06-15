@@ -63,14 +63,14 @@ class ScoreCAM:
         )
 
         weights = weights.reshape((-1, 1, 1, batch_size)) # shape (K, 1, 1, 1)
-        weights = tf.reshape(weights, (batch_size, 1, 1, weights.shape[0])) # shape (1, 1, 1, K)
 
-        cam = ScoreCAM.generate_cam(weights, maps)
+        cams = ScoreCAM.generate_cam(weights, maps)
 
         heatmaps = np.array(
             [
                 # not showing the actual image if image_weight=0
-                heatmap_display(cam.numpy()[0], images[0], colormap, image_weight)
+                heatmap_display(cam.numpy(), image, colormap, image_weight)
+                for cam, image in zip(cams, images)
             ]
         )
 
@@ -116,8 +116,9 @@ class ScoreCAM:
             Tuple[numpy.ndarray, tf.Tensor]: (Output score of given class, Normalized last conv outputs)
         """
 
-        conv_model = tf.keras.models.Model(
-            [model.inputs], [model.get_layer(layer_name).output]
+        conv_model = tf.keras.Model(
+            inputs=model.input,
+            outputs=model.get_layer(layer_name).output
         )
         softmax_model = tf.keras.models.Model(
             [model.inputs], [model.outputs]
@@ -125,20 +126,21 @@ class ScoreCAM:
 
         inputs = tf.cast(images, tf.float32)
 
-        conv_output = conv_model(inputs)
+        conv_output = conv_model.predict(inputs)
         resized_conv_output = resize_activations(conv_output, input_shape)
-        normalized_maps = normalize_activations(resized_conv_output) # shape (batch_size, H, W, K)
+        normalized_maps = normalize_activations(resized_conv_output) # shape (batch_size, K, H, W)
         shape = normalized_maps.shape
 
         # reshape normalized_maps tensor to shape (K, H, W, batch_size)
-        reshaped_normalized_maps = tf.reshape(normalized_maps, (shape[3], shape[1], shape[2], shape[0]))
+        reshaped_normalized_maps = tf.reshape(normalized_maps, (shape[1], shape[2], shape[3], shape[0]))
 
-        masked_images = tf.math.multiply(reshaped_normalized_maps, inputs)
+        # (K, H, W, batch_size) * (K, H, W, 3)
+        masked_images = tf.math.multiply(reshaped_normalized_maps, tf.tile(inputs, (reshaped_normalized_maps.shape[0], 1, 1, 1)))
         
         classes_activation_scale = softmax_model.predict(masked_images)
 
         # return the output only for the given class
-        weights = classes_activation_scale[:, class_index] # shape (K,)
+        weights = classes_activation_scale[0][:, class_index] # shape (K,)
 
         return weights, normalized_maps
 
@@ -153,17 +155,23 @@ class ScoreCAM:
         Args:
             weights (numpy.ndarray): Output score with shape (K, 1, 1, batch_size) where
             K is the number of filters in the last convolutional layer
-            maps (tf.Tensor): 4D-Tensor with shape (K, H, W, batch_size) where K is the number
+            maps (tf.Tensor): 4D-Tensor with shape (batch_size, K, H, W) where K is the number
             of filters in the last convolutional layer and H,W are the input image size
 
         Returns:
-            tf.Tensor: 4D-Tensor of linear weighted combination of all activation maps
-            with shape (batch_size, H, W, 1)
+            tf.Tensor: 3D-Tensor of linear weighted combination of all activation maps
+            with shape (batch_size, H, W)
         """
 
-        cam = tf.math.reduce_sum(tf.math.multiply(weights, maps), axis=-1, keepdims=True)
+        cam = tf.math.multiply(weights, maps)
 
-        return cam
+        # relu
+        cam = tf.math.reduce_max(cam, axis=0)
+        relu_cam = tf.where(cam > 0, cam, 0)
+
+        relu_cam = tf.reshape(relu_cam, (relu_cam.shape[2], relu_cam.shape[0], relu_cam.shape[1]))
+
+        return relu_cam
 
     def save(self, grid, output_dir, output_name):
         """
