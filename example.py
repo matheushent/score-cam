@@ -3,7 +3,7 @@ import numpy as np
 
 from core.score_cam import ScoreCAM
 
-IMAGE_PATH = "./hummingbird.jpg"
+IMAGE_PATH = "./cat.jpg"
 
 gpus = tf.config.list_physical_devices('GPU')
 for gpu in gpus:
@@ -20,10 +20,10 @@ with tf.device('/GPU:0'):
 
     data = (img, None)
 
-    tabby_cat_class_index = 94
+    class_index = 281
     explainer = ScoreCAM()
     # Compute ScoreCAM on VGG16
     image = explainer.explain(
-        data, model, tabby_cat_class_index, input_shape, _grid=False
+        data, model, class_index, input_shape, _grid=False
     )[0]
     explainer.save(image, ".", "score_cam.png")
