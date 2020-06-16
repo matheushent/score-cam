@@ -1,3 +1,4 @@
+from tensorflow.keras.applications.vgg16 import preprocess_input
 import tensorflow as tf
 import numpy as np
 
@@ -17,6 +18,7 @@ with tf.device('/GPU:0'):
     img = tf.keras.preprocessing.image.load_img(IMAGE_PATH, target_size=input_shape)
     img = tf.keras.preprocessing.image.img_to_array(img)
     img = np.expand_dims(img, axis=0)
+    img = preprocess_input(img)
 
     data = (img, None)
 
@@ -24,6 +26,6 @@ with tf.device('/GPU:0'):
     explainer = ScoreCAM()
     # Compute ScoreCAM on VGG16
     image = explainer.explain(
-        data, model, class_index, input_shape, _grid=False
+        data, model, class_index, input_shape, display_in_grid=False
     )[0]
     explainer.save(image, ".", "score_cam.png")
