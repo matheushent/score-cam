@@ -14,7 +14,7 @@ def resize_activations(tensor, input_shape):
         tensor (tf.Tensor): 4D-Tensor with shape (batch_size, K, H, W)
     """
 
-    resized_activation = list()
+    resized_activations = list()
 
     for j in range(tensor.shape[0]):
 
@@ -25,9 +25,9 @@ def resize_activations(tensor, input_shape):
                 transform.resize(tensor[j, ..., i], input_shape, preserve_range=True)
             )
         
-        resize_activations.append(np.array(activations))
+        resized_activations.append(np.array(activations))
 
-    return tf.convert_to_tensor(np.array(resize_activations), dtype=tf.float32)
+    return tf.convert_to_tensor(np.array(resized_activations), dtype=tf.float32)
 
 def normalize_activations(tensor):
     """Utility function to normalize a given tensor
