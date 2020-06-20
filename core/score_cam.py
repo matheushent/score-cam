@@ -97,7 +97,7 @@ class ScoreCAM:
                 return layer.name
 
         raise ValueError(
-            "Model does not seem to contain 4D layer. Grad CAM cannot be applied."
+            "Model does not seem to contain 4D layer. Score-CAM cannot be applied."
         )
     
     @staticmethod
