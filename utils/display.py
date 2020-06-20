@@ -59,8 +59,10 @@ def grid_display(array, num_rows=None, num_columns=None):
 def image_to_uint_255(image):
     """
     Convert float images to int 0-255 images.
+
     Args:
         image (numpy.ndarray): Input image. Can be either [0, 255], [0, 1], [-1, 1]
+
     Returns:
         numpy.ndarray:
     """
@@ -69,6 +71,9 @@ def image_to_uint_255(image):
 
     if image.min() < 0:
         image = (image + 1.0) / 2.0
+
+    if image.max() > 1:
+        return image.astype("uint8")
 
     return (image * 255).astype("uint8")
 
