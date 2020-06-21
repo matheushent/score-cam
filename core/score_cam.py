@@ -142,7 +142,7 @@ class ScoreCAM:
         # return the output only for the given class
         weights = classes_activation_scale[0][:, class_index] # shape (K,)
 
-        return weights, normalized_maps
+        return weights, reshaped_normalized_maps
 
     @staticmethod
     def generate_cam(weights, maps):
